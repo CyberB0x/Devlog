@@ -1,0 +1,30 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<div class="container">
+  <h2 class="mb-4">👤 Мои статьи</h2>
+
+  {% if articles %}
+    <div class="list-group">
+      {% for article in articles %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h5>
+              <small class="text-muted">Создана: {{ article.created_at|date:"d.m.Y H:i" }}</small><br>
+              <small class="text-muted">Категория: {{ article.category }}</small>
+            </div>
+            <div class="text-end">
+              <a href="{% url 'delete_article' article.pk %}" class="btn btn-sm btn-outline-danger">🗑 Удалить</a><br>
+              <a href="{% url 'article_stats' article.pk %}" class="btn btn-sm btn-outline-info mt-1">📊 Статистика</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>У вас пока нет опубликованных статей.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
