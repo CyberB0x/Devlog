@@ -1,0 +1,36 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+    <h3 class="mb-4 text-center">🔐 Вход в аккаунт</h3>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        ❌ Неверный логин или пароль.
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_username" class="form-label">Имя пользователя</label>
+        <input type="text" name="username" class="form-control" id="id_username" required>
+      </div>
+      <div class="mb-3">
+        <label for="id_password" class="form-label">Пароль</label>
+        <input type="password" name="password" class="form-control" id="id_password" required>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </div>
+    </form>
+
+    <div class="text-center mt-3">
+      Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

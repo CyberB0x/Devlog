@@ -1,0 +1,54 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="mb-4">
+    <h1>{{ article.title }}</h1>
+    <p class="text-muted">👁 {{ article.views }} просмотров • {{ article.created_at|date:"d M Y" }}</p>
+
+    {% if article.image %}
+        <img src="{{ article.image.url }}" alt="Картинка" class="img-fluid rounded mb-4">
+    {% endif %}
+
+    <div class="mb-4">
+        {{ article.content|linebreaksbr }}
+    </div>
+
+    {% if article.code %}
+    <h5>💡 Код:</h5>
+    <pre><code class="language-python">{{ article.code }}</code></pre>
+    {% endif %}
+</div>
+
+<!-- 📊 График просмотров (заготовка) -->
+<canvas id="viewsChart" height="120"></canvas>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('viewsChart');
+  const viewsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|safe }},  // передаётся из view
+      datasets: [{
+        label: 'Просмотры',
+        data: {{ chart_data|safe }},
+        fill: false,
+        borderColor: 'blue',
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        tooltip: { enabled: true }
+      }
+    }
+  });
+</script>
+{% endblock %}
