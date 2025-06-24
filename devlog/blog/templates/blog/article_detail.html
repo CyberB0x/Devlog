@@ -1,54 +1,84 @@
 {% extends 'blog/base.html' %}
 {% load static %}
+
 {% block content %}
 
 <div class="mb-4">
-    <h1>{{ article.title }}</h1>
-    <p class="text-muted">👁 {{ article.views }} просмотров • {{ article.created_at|date:"d M Y" }}</p>
+    <h1 class="mb-2">{{ article.title }}</h1>
+    <p class="text-muted">
+        👤 {{ article.author.username }} |
+        🕒 {{ article.created_at|date:"d M Y H:i" }} |
+        👁 {{ article.views }} просмотров
+    </p>
 
     {% if article.image %}
-        <img src="{{ article.image.url }}" alt="Картинка" class="img-fluid rounded mb-4">
+    <img src="{{ article.image.url }}" alt="Картинка" class="img-fluid rounded mb-4">
     {% endif %}
 
-    <div class="mb-4">
-        {{ article.content|linebreaksbr }}
+    {% if article.content_html %}
+    <div class="bg-light-subtle p-4 rounded mb-4 border shadow-sm">
+        <h5 class="fw-semibold">📄 Содержание статьи:</h5>
+        <div>{{ article.content_html|safe }}</div>
     </div>
+    {% endif %}
 
-    {% if article.code %}
-    <h5>💡 Код:</h5>
-    <pre><code class="language-python">{{ article.code }}</code></pre>
+    {% if article.code_snippet %}
+    <div class="mt-4">
+        <h5 class="fw-semibold">💻 Код:</h5>
+        <pre class="bg-dark text-light p-3 rounded"><code>{{ article.code_snippet|escape }}</code></pre>
+    </div>
     {% endif %}
 </div>
 
-<!-- 📊 График просмотров (заготовка) -->
-<canvas id="viewsChart" height="120"></canvas>
+<!-- 📊 График просмотров -->
+<div class="card shadow-sm mb-5">
+    <div class="card-body">
+        <h5 class="card-title">📈 Статистика просмотров</h5>
+        <canvas id="viewsChart" height="120"></canvas>
+    </div>
+</div>
 
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('viewsChart');
-  const viewsChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: {{ chart_labels|safe }},  // передаётся из view
-      datasets: [{
-        label: 'Просмотры',
-        data: {{ chart_data|safe }},
-        fill: false,
-        borderColor: 'blue',
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: true },
-        tooltip: { enabled: true }
-      }
-    }
-  });
+    const ctx = document.getElementById('viewsChart');
+    const viewsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Просмотры',
+                data: {{ chart_data|safe }},
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.2,
+                pointRadius: 4,
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
 </script>
 {% endblock %}
