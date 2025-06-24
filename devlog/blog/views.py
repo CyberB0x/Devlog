@@ -1,13 +1,15 @@
-import json
-import datetime
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Count
+from django.db.models.functions import TruncDate  # ← ЭТО СЮДА
+import datetime
+import json
 
 from .models import Article, Category, Favorite, Tip, ArticleView
 from .forms import ArticleForm, RegisterForm
+
 
 
 def home(request):
@@ -18,7 +20,7 @@ def home(request):
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
 
-    # Учёт просмотров по session_key
+    # Уникальный просмотр по session_key
     session_key = request.session.session_key
     if not session_key:
         request.session.save()
@@ -29,17 +31,16 @@ def article_detail(request, pk):
         article.views += 1
         article.save()
 
-    # 🔢 Группируем просмотры по дням
+    # 📊 Статистика по дням
     views = (
         ArticleView.objects
         .filter(article=article)
-        .extra({'date': "DATE(timestamp)"})
+        .annotate(date=TruncDate('timestamp'))
         .values('date')
         .annotate(count=Count('id'))
         .order_by('date')
     )
 
-    # 📊 Подготовка данных для графика
     chart_labels = json.dumps([str(v['date']) for v in views])
     chart_data = json.dumps([v['count'] for v in views])
 
