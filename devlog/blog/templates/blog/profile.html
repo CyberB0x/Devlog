@@ -2,44 +2,40 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm mb-4">
-        <div class="card-body d-flex align-items-center">
-            {% if profile.avatar %}
-            <img src="{{ profile.avatar.url }}" class="rounded-circle shadow" width="120" alt="Аватар">
-            {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle shadow" width="120"
-                 alt="Без аватара">
-            {% endif %}
-            <div>
-                <h4 class="mb-1">{{ user.username }}</h4>
-                <p class="text-muted">{{ user.email }}</p>
-                <p>{{ profile.bio|default:"Нет описания" }}</p>
-                <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary mt-2">Выйти</a>
-            </div>
-        </div>
-    </div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Avatar" class="rounded-circle mb-3 shadow" width="120" height="120">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="rounded-circle mb-3 shadow" width="120" height="120">
+                    {% endif %}
 
-    <h5 class="mb-3">📝 Публикации пользователя</h5>
-    {% if articles %}
-    <div class="row row-cols-1 row-cols-md-2 g-4">
-        {% for article in articles %}
-        <div class="col">
-            <div class="card h-100 border shadow-sm">
-                {% if article.image %}
-                <img src="{{ article.image.url }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ article.title }}</h5>
-                    <p class="card-text text-muted small">{{ article.created_at|date:"d M Y H:i" }} • {{ article.views }} просмотров</p>
-                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary btn-sm">Читать</a>
+                    <h4 class="fw-semibold">{{ user.username }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary mt-2">Редактировать профиль</a>
                 </div>
             </div>
+
+            <div class="mt-5">
+                <h5 class="fw-semibold mb-3">📝 Ваши статьи</h5>
+                {% if articles %}
+                    <ul class="list-group">
+                        {% for article in articles %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a>
+                                <span class="text-muted small">{{ article.created_at|date:"d M Y" }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Вы ещё не написали ни одной статьи.</p>
+                {% endif %}
+            </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <p class="text-muted">Пользователь пока не добавил ни одной статьи.</p>
-    {% endif %}
 </div>
 {% endblock %}

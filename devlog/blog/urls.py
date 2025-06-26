@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import toggle_like
 from . import views
 
 urlpatterns = [
@@ -7,6 +8,8 @@ urlpatterns = [
     path('article/add/', views.add_article, name='add_article'),
     path('article/<int:pk>/delete/', views.delete_article, name='delete_article'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('register/', views.register, name='register'),
     path('api/views/<int:pk>/', views.stats_view, name='article_stats'),
+    path('like/<int:pk>/', toggle_like, name='toggle_like'),
 ]

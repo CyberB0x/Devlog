@@ -10,32 +10,49 @@
         👁 {{ article.views }} просмотров
     </p>
 
-    {% if article.content_html %}
-    <div class="p-3 mb-4 bg-light border rounded shadow-sm">
-        <h5>📄 Содержание статьи:</h5>
-        <div>{{ article.content_html|safe }}</div>
-    </div>
+    {% if article.image %}
+        <img src="{{ article.image.url }}" class="img-fluid rounded mb-4" alt="Изображение">
     {% endif %}
 
-    {% if article.image %}
-    <img src="{{ article.image.url }}" class="img-fluid rounded mb-4" alt="Изображение">
+    {% if article.content_html %}
+        <div class="p-3 mb-4 bg-light border rounded shadow-sm">
+            <h5>📄 Содержание статьи:</h5>
+            <div>{{ article.content_html|safe }}</div>
+        </div>
     {% endif %}
 
     {% if article.code_snippet %}
-    <h5>💻 Код:</h5>
-    <pre class="bg-dark text-light p-3 rounded shadow-sm"><code>{{ article.code_snippet|escape }}</code></pre>
+        <h5>💻 Код:</h5>
+        <pre class="bg-dark text-light p-3 rounded shadow-sm"><code>{{ article.code_snippet|escape }}</code></pre>
     {% endif %}
 </div>
 
-<hr>
-<hr>
+<!-- ❤️ Лайк -->
+<div class="mb-4">
+    {% if user.is_authenticated %}
+    <button id="like-btn" class="btn btn-outline-danger" data-article="{{ article.id }}">
+        {% if is_liked %}
+            ❤️
+        {% else %}
+            🤍
+        {% endif %}
+        <span id="like-count">{{ like_count }}</span>
+    </button>
+    {% else %}
+        <p class="text-muted">Чтобы поставить лайк, <a href="{% url 'login' %}">войдите в аккаунт</a>.</p>
+    {% endif %}
+</div>
+
+<!-- 💬 Комментарии -->
 <div class="mt-5">
     <h5>💬 Комментарии ({{ comments.count }})</h5>
+
     {% if comments %}
         <ul class="list-group mb-4">
             {% for comment in comments %}
                 <li class="list-group-item">
-                    <strong>{{ comment.author.username }}</strong> <span class="text-muted small">{{ comment.created_at|date:"d M Y H:i" }}</span>
+                    <strong>{{ comment.author.username }}</strong>
+                    <span class="text-muted small">{{ comment.created_at|date:"d M Y H:i" }}</span>
                     <p class="mb-0">{{ comment.content }}</p>
                 </li>
             {% endfor %}
@@ -48,16 +65,41 @@
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-success mt-2">Отправить</button>
+            <button class="btn btn-success">Отправить</button>
         </form>
     {% else %}
         <p class="text-muted">Чтобы оставить комментарий, <a href="{% url 'login' %}">войдите в аккаунт</a>.</p>
     {% endif %}
 </div>
-
-</br>
-
-
-
 {% endblock %}
 
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const likeBtn = document.getElementById("like-btn");
+    if (!likeBtn) return;
+
+    likeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const articleId = this.dataset.article;
+
+        fetch(`/like/${articleId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            likeBtn.innerHTML = (data.liked ? "❤️" : "🤍") + " <span id='like-count'>" + data.like_count + "</span>";
+        })
+        .catch(err => {
+            console.error("Ошибка:", err);
+        });
+    });
+});
+</script>
+{% endblock %}

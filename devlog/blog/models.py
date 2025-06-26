@@ -47,6 +47,18 @@ class ArticleView(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
 
+class Like(models.Model):
+    article = models.ForeignKey('Article', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('article', 'user')
+
+    def __str__(self):
+        return f"{self.user} → {self.article}"
+
+
 class Comment(models.Model):
     article = models.ForeignKey('Article', on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
