@@ -1,30 +1,45 @@
 {% extends 'blog/base.html' %}
+{% load static %}
+
 {% block content %}
-
-<div class="container">
-  <h2 class="mb-4">👤 Мои статьи</h2>
-
-  {% if articles %}
-    <div class="list-group">
-      {% for article in articles %}
-        <div class="list-group-item">
-          <div class="d-flex justify-content-between align-items-center">
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center">
+            {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" class="rounded-circle shadow" width="120" alt="Аватар">
+            {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle shadow" width="120"
+                 alt="Без аватара">
+            {% endif %}
             <div>
-              <h5><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h5>
-              <small class="text-muted">Создана: {{ article.created_at|date:"d.m.Y H:i" }}</small><br>
-              <small class="text-muted">Категория: {{ article.category }}</small>
+                <h4 class="mb-1">{{ user.username }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <p>{{ profile.bio|default:"Нет описания" }}</p>
+                <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary mt-2">Выйти</a>
             </div>
-            <div class="text-end">
-              <a href="{% url 'delete_article' article.pk %}" class="btn btn-sm btn-outline-danger">🗑 Удалить</a><br>
-              <a href="{% url 'article_stats' article.pk %}" class="btn btn-sm btn-outline-info mt-1">📊 Статистика</a>
-            </div>
-          </div>
         </div>
-      {% endfor %}
     </div>
-  {% else %}
-    <p>У вас пока нет опубликованных статей.</p>
-  {% endif %}
-</div>
 
+    <h5 class="mb-3">📝 Публикации пользователя</h5>
+    {% if articles %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for article in articles %}
+        <div class="col">
+            <div class="card h-100 border shadow-sm">
+                {% if article.image %}
+                <img src="{{ article.image.url }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ article.title }}</h5>
+                    <p class="card-text text-muted small">{{ article.created_at|date:"d M Y H:i" }} • {{ article.views }} просмотров</p>
+                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary btn-sm">Читать</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">Пользователь пока не добавил ни одной статьи.</p>
+    {% endif %}
+</div>
 {% endblock %}

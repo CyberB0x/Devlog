@@ -3,12 +3,13 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Count
-from django.db.models.functions import TruncDate  # ← ЭТО СЮДА
+
+from django.db.models.functions import TruncDate
 import datetime
 import json
 
-from .models import Article, Category, Favorite, Tip, ArticleView
-from .forms import ArticleForm, RegisterForm
+from .models import Article, Category, Favorite, Tip, ArticleView, Profile
+from .forms import ArticleForm, RegisterForm, CommentForm
 
 
 
@@ -19,37 +20,24 @@ def home(request):
 
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
+    comments = article.comments.all().order_by('-created_at')
 
-    # Уникальный просмотр по session_key
-    session_key = request.session.session_key
-    if not session_key:
-        request.session.save()
-        session_key = request.session.session_key
-
-    if not ArticleView.objects.filter(article=article, session_key=session_key).exists():
-        ArticleView.objects.create(article=article, session_key=session_key)
-        article.views += 1
-        article.save()
-
-    # 📊 Статистика по дням
-    views = (
-        ArticleView.objects
-        .filter(article=article)
-        .annotate(date=TruncDate('timestamp'))
-        .values('date')
-        .annotate(count=Count('id'))
-        .order_by('date')
-    )
-
-    chart_labels = json.dumps([str(v['date']) for v in views])
-    chart_data = json.dumps([v['count'] for v in views])
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid() and request.user.is_authenticated:
+            comment = form.save(commit=False)
+            comment.article = article
+            comment.author = request.user
+            comment.save()
+            return redirect('article_detail', pk=pk)
+    else:
+        form = CommentForm()
 
     return render(request, 'blog/article_detail.html', {
         'article': article,
-        'chart_labels': chart_labels,
-        'chart_data': chart_data
+        'comments': comments,
+        'form': form,
     })
-
 
 
 @login_required
@@ -74,9 +62,14 @@ def delete_article(request, pk):
 
 
 @login_required
-def profile(request):
-    user_articles = Article.objects.filter(author=request.user)
-    return render(request, 'blog/profile.html', {'articles': user_articles})
+def profile_view(request):
+    profile = Profile.objects.get(user=request.user)
+    articles = Article.objects.filter(author=request.user).order_by('-created_at')
+    return render(request, 'blog/profile.html', {
+        'user': request.user,
+        'profile': profile,
+        'articles': articles,
+    })
 
 
 def register(request):
