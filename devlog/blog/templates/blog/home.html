@@ -1,13 +1,29 @@
 {% extends 'blog/base.html' %}
+{% load static %}
+
 {% block content %}
-  <h1>Последние статьи</h1>
+<h2 class="mb-4">📚 Последние статьи</h2>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for article in articles %}
-    <div>
-      <h2><a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a></h2>
-      <p>Автор: {{ article.author }} | Просмотров: {{ article.views }}</p>
-      <p>{{ article.content_md|truncatechars:200 }}</p>
+  <div class="col">
+    <div class="card h-100 shadow-sm">
+      {% if article.image %}
+      <img src="{{ article.image.url }}" class="rounded" alt="{{ article.title }}">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ article.title }}</h5>
+        <p class="card-text text-muted">
+          👤 {{ article.author.username }}<br>
+          🕒 {{ article.created_at|date:"d M Y" }}<br>
+          👁 {{ article.views }} просмотров
+        </p>
+        <a href="{% url 'article_detail' article.pk %}" class="btn btn-outline-primary btn-sm">Читать →</a>
+      </div>
     </div>
+  </div>
   {% empty %}
-    <p>Статей пока нет.</p>
+  <p>Нет опубликованных статей.</p>
   {% endfor %}
+</div>
 {% endblock %}

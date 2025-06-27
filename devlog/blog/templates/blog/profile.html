@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block content %}
+
+{% if messages %}
+  <ul class="messages">
+      {% for message in messages %}
+      <li class="alert alert-primary">{{ message }}</li>
+      {% endfor %}
+  </ul>
+{% endif %}
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -35,7 +44,38 @@
                     <p class="text-muted">Вы ещё не написали ни одной статьи.</p>
                 {% endif %}
             </div>
+
+            <p>👁 Общие просмотры ваших статей: <strong>{{ total_views }}</strong></p>
+            <canvas id="viewsChart" height="100"></canvas>
+
+
         </div>
     </div>
 </div>
 {% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch("{% url 'stats_view' user.id %}")
+  .then(res => res.json())
+  .then(data => {
+    new Chart(document.getElementById('viewsChart'), {
+      type: 'line',
+      data: {
+        labels: data.dates,
+        datasets: [{
+          label: 'Просмотры',
+          data: data.views,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          tension: 0.3,
+          fill: false
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  });
+</script>

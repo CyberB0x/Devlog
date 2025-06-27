@@ -4,14 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib import messages
 from django.db.models.functions import TruncDate
 import datetime
 import json
 
 from .models import Article, Category, Favorite, Tip, ArticleView, Profile, Like
 from .forms import ArticleForm, RegisterForm, CommentForm, EditProfileForm, ProfileAvatarForm
-
 
 
 def home(request):
@@ -21,10 +20,23 @@ def home(request):
 
 from .models import Like  # убедись, что импортировал модель Like
 
+
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
     comments = article.comments.all().order_by('-created_at')
 
+    # Просмотр: по session_key
+    session_key = request.session.session_key
+    if not session_key:
+        request.session.create()
+        session_key = request.session.session_key
+
+    if not ArticleView.objects.filter(article=article, session_key=session_key).exists():
+        ArticleView.objects.create(article=article, session_key=session_key)
+        article.views += 1
+        article.save()
+
+    # Комментарии
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid() and request.user.is_authenticated:
@@ -47,6 +59,7 @@ def article_detail(request, pk):
         'is_liked': is_liked,
         'like_count': article.like_set.count(),
     })
+
 
 
 @login_required
@@ -73,12 +86,22 @@ def delete_article(request, pk):
 @login_required
 def profile_view(request):
     profile = Profile.objects.get(user=request.user)
-    articles = Article.objects.filter(author=request.user).order_by('-created_at')
+
+    articles = (
+        Article.objects
+        .filter(author=request.user)
+        .annotate(total_views=Count('articleview'))
+        .order_by('-created_at')
+    )
+
+    total_views_sum = sum(article.total_views for article in articles)
+
     return render(request, 'blog/profile.html', {
-        'user': request.user,
         'profile': profile,
         'articles': articles,
+        'total_views_sum': total_views_sum,
     })
+
 
 @login_required
 def edit_profile(request):
@@ -95,6 +118,11 @@ def edit_profile(request):
                 user.save()
             avatar_form.save()
             login(request, user)  # Перелогиниваем, если пароль изменился
+
+            messages.add_message(
+                request, messages.INFO, "Обновление профиля успешно завершено!"
+            )
+
             return redirect('profile')
     else:
         user_form = EditProfileForm(instance=user)
@@ -104,7 +132,6 @@ def edit_profile(request):
         'user_form': user_form,
         'avatar_form': avatar_form
     })
-
 
 
 def register(request):
@@ -121,14 +148,15 @@ def register(request):
 
 # 📊 Данные для графика просмотров (json)
 def stats_view(request, pk):
-    article = get_object_or_404(Article, pk=pk)
     views = (
         ArticleView.objects
-        .filter(article=article)
-        .extra({'date': "date(timestamp)"})
+        .filter(article__author_id=pk)
+        .annotate(date=TruncDate('timestamp'))
         .values('date')
         .annotate(count=Count('id'))
+        .order_by('date')
     )
+
     data = {
         'dates': [str(v['date']) for v in views],
         'views': [v['count'] for v in views]
@@ -153,3 +181,4 @@ def toggle_like(request, pk):
             'liked': liked,
             'like_count': article.like_set.count()
         })
+

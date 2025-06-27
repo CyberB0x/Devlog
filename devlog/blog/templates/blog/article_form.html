@@ -1,33 +1,89 @@
 {% extends 'blog/base.html' %}
+{% load static %}
+{% load form_tags %}
+
 {% block content %}
+<style>
+  .ce-toolbar__plus {
+      left: 8px !important;
+      transform: none !important;
+  }
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow p-4">
-        <h3 class="mb-4 text-center">📝 Новая статья</h3>
+  .codex-editor--narrow .ce-toolbar__plus {
+      left: 8px !important;
+  }
 
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
+  .codex-editor__redactor {
+      padding-left: 1.5rem !important;
+      background-color: #fff;
+      border-radius: 0.5rem;
+  }
 
-          {% for field in form %}
-            <div class="mb-3">
-              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
-              {% if field.errors %}
-                <div class="text-danger small">{{ field.errors|striptags }}</div>
-              {% endif %}
-            </div>
-          {% endfor %}
+  #editorjs {
+      min-height: 300px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.3s ease;
+  }
 
-          <div class="d-grid">
-            <button type="submit" class="btn btn-success">Опубликовать</button>
-          </div>
-        </form>
+  .editor-toolbar {
+      margin-bottom: 1rem;
+  }
 
-      </div>
+  .form-label {
+      font-weight: bold;
+  }
+</style>
+
+<h2 class="mb-4">📝 Создать статью</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="{{ form.title.id_for_label }}" class="form-label">📌 Заголовок:</label>
+        {{ form.title|add_class:"form-control" }}
     </div>
-  </div>
-</div>
 
+    <div class="mb-3">
+        <label for="{{ form.image.id_for_label }}" class="form-label">🖼️ Изображение:</label>
+        {{ form.image|add_class:"form-control" }}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">📄 Содержание:</label>
+        <div id="editorjs"></div>
+        <input type="hidden" name="content_html" id="content_html">
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">💾 Сохранить</button>
+</form>
+
+<!-- Editor.js и плагины -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+
+<script>
+    const editor = new EditorJS({
+        holder: 'editorjs',
+        tools: {
+            header: Header,
+            code: CodeTool,
+            quote: Quote,
+            table: Table
+        },
+        placeholder: 'Начните писать...',
+        autofocus: true,
+        onReady: () => console.log('Editor.js готов'),
+        onChange: async () => {
+            const content = await editor.save();
+            document.getElementById('content_html').value = JSON.stringify(content);
+        }
+    });
+</script>
 {% endblock %}

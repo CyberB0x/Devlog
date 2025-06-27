@@ -11,6 +11,16 @@
             font-weight: bold;
             text-decoration: underline;
         }
+
+        .liked {
+            animation: pop 0.3s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-body text-body">
@@ -33,15 +43,9 @@
 
             {% if user.is_authenticated %}
             <ul class="navbar-nav ms-auto align-items-center gap-2">
-                <li class="nav-item">
-                    <a class="btn btn-secondary btn-sm" href="{% url 'home' %}"> Главная</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-success btn-sm" href="{% url 'profile' %}">👤 Профиль</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-primary btn-sm" href="{% url 'add_article' %}">➕ Добавить статью</a>
-                </li>
+                <li class="nav-item"><a class="btn btn-secondary btn-sm" href="{% url 'home' %}">🏠 Главная</a></li>
+                <li class="nav-item"><a class="btn btn-success btn-sm" href="{% url 'profile' %}">👤 Профиль</a></li>
+                <li class="nav-item"><a class="btn btn-primary btn-sm" href="{% url 'add_article' %}">➕ Добавить</a></li>
                 <li class="nav-item">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
@@ -59,33 +63,26 @@
 
 <!-- 📦 Контент -->
 <div class="container">
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock %}
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ☀️🌙 Переключатель тёмной темы
+    // 🌗 Тема
     const themeBtn = document.getElementById("themeToggle");
     const htmlEl = document.documentElement;
-
-    if (themeBtn) {
-        themeBtn.addEventListener("click", () => {
-            let current = htmlEl.getAttribute("data-bs-theme");
-            let next = current === "dark" ? "light" : "dark";
-            htmlEl.setAttribute("data-bs-theme", next);
-            localStorage.setItem("theme", next);
-        });
-    }
-
-    // 🧠 Восстановление темы
     const saved = localStorage.getItem("theme");
     if (saved) htmlEl.setAttribute("data-bs-theme", saved);
+
+    themeBtn?.addEventListener("click", () => {
+        let current = htmlEl.getAttribute("data-bs-theme");
+        let next = current === "dark" ? "light" : "dark";
+        htmlEl.setAttribute("data-bs-theme", next);
+        localStorage.setItem("theme", next);
+    });
 </script>
 
 {% block extra_js %}{% endblock %}
-
 </body>
 </html>

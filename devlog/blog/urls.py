@@ -12,4 +12,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('api/views/<int:pk>/', views.stats_view, name='article_stats'),
     path('like/<int:pk>/', toggle_like, name='toggle_like'),
+    path('stats/<int:pk>/', views.stats_view, name='stats_view'),
+
 ]
