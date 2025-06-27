@@ -43,13 +43,13 @@
 
             {% if user.is_authenticated %}
             <ul class="navbar-nav ms-auto align-items-center gap-2">
-                <li class="nav-item"><a class="btn btn-secondary btn-sm" href="{% url 'home' %}">🏠 Главная</a></li>
-                <li class="nav-item"><a class="btn btn-success btn-sm" href="{% url 'profile' %}">👤 Профиль</a></li>
-                <li class="nav-item"><a class="btn btn-primary btn-sm" href="{% url 'add_article' %}">➕ Добавить</a></li>
+                <li class="nav-item"><a class="btn btn-secondary btn-sm" href="{% url 'home' %}">Главная</a></li>
+                <li class="nav-item"><a class="btn btn-success btn-sm" href="{% url 'profile' %}">Профиль</a></li>
+                <li class="nav-item"><a class="btn btn-primary btn-sm" href="{% url 'add_article' %}">Добавить</a></li>
                 <li class="nav-item">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm">🚪 Выйти</button>
+                        <button type="submit" class="btn btn-outline-light btn-sm">Выйти</button>
                     </form>
                 </li>
                 <li class="nav-item">

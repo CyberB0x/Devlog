@@ -5,9 +5,9 @@
 <div class="mb-4">
     <h1>{{ article.title }}</h1>
     <p class="text-muted">
-        👤 {{ article.author.username }} |
-        🕒 {{ article.created_at|date:"d M Y H:i" }} |
-        👁 {{ article.views }} просмотров
+        <img src="{% static 'icons/author.png' %}" width="16" height="16"> {{ article.author.username }} |
+        <img src="{% static 'icons/created_at.png' %}" width="16" height="16"> {{ article.created_at|date:"d M Y H:i" }} |
+        <img src="{% static 'icons/views.png' %}" width="16" height="16"> {{ article.views }} просмотров
     </p>
 
     {% if article.image %}
