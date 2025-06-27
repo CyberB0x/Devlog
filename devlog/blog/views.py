@@ -6,6 +6,7 @@ from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models.functions import TruncDate
+from .utils import render_editorjs_to_html
 import datetime
 import json
 
@@ -61,7 +62,6 @@ def article_detail(request, pk):
     })
 
 
-
 @login_required
 def add_article(request):
     if request.method == 'POST':
@@ -69,12 +69,16 @@ def add_article(request):
         if form.is_valid():
             article = form.save(commit=False)
             article.author = request.user
+
+            # 🔥 Преобразуем Editor.js JSON → HTML
+            raw_content = request.POST.get("content_html", "")
+            article.content_html = render_editorjs_to_html(raw_content)
+
             article.save()
-            return redirect('home')
+            return redirect('article_detail', pk=article.pk)
     else:
         form = ArticleForm()
     return render(request, 'blog/article_form.html', {'form': form})
-
 
 @login_required
 def delete_article(request, pk):
@@ -181,4 +185,3 @@ def toggle_like(request, pk):
             'liked': liked,
             'like_count': article.like_set.count()
         })
-

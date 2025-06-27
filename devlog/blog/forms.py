@@ -16,12 +16,12 @@ class BootstrapLoginForm(AuthenticationForm):
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ['title', 'content_md', 'image', 'code_snippet', 'category']
+        fields = ['title', 'image']
+        widgets = {
+            'title': forms.TextInput(attrs={"class": "form-control"}),
+            'image': forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs['class'] = 'form-control'
 
 
 class RegisterForm(UserCreationForm):

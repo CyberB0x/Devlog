@@ -1,72 +1,49 @@
 {% extends 'blog/base.html' %}
 {% load static %}
-{% load form_tags %}
 
 {% block content %}
 <style>
-  .ce-toolbar__plus {
-      left: 8px !important;
-      transform: none !important;
-  }
-
-  .codex-editor--narrow .ce-toolbar__plus {
-      left: 8px !important;
-  }
-
-  .codex-editor__redactor {
-      padding-left: 1.5rem !important;
-      background-color: #fff;
-      border-radius: 0.5rem;
-  }
-
-  #editorjs {
-      min-height: 300px;
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 20px;
-      transition: all 0.3s ease;
-  }
-
-  .editor-toolbar {
-      margin-bottom: 1rem;
-  }
-
-  .form-label {
-      font-weight: bold;
-  }
+    .ce-toolbar__plus {
+        left: 8px !important;
+        transform: none !important;
+    }
+    .codex-editor--narrow .ce-toolbar__plus {
+        left: 8px !important;
+    }
+    .codex-editor__redactor {
+        padding-left: 1.5rem !important;
+    }
 </style>
 
-<h2 class="mb-4">📝 Создать статью</h2>
-
+<h2>📝 Создать статью</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-
     <div class="mb-3">
-        <label for="{{ form.title.id_for_label }}" class="form-label">📌 Заголовок:</label>
-        {{ form.title|add_class:"form-control" }}
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+    <div class="mb-3">
+        {{ form.image.label_tag }}
+        {{ form.image }}
     </div>
 
     <div class="mb-3">
-        <label for="{{ form.image.id_for_label }}" class="form-label">🖼️ Изображение:</label>
-        {{ form.image|add_class:"form-control" }}
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">📄 Содержание:</label>
-        <div id="editorjs"></div>
+        <label for="editorjs">Содержание:</label>
+        <div id="editorjs" class="border p-3 rounded bg-white"></div>
         <input type="hidden" name="content_html" id="content_html">
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">💾 Сохранить</button>
+    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
 </form>
 
-<!-- Editor.js и плагины -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
 
 <script>
     const editor = new EditorJS({
@@ -75,11 +52,19 @@
             header: Header,
             code: CodeTool,
             quote: Quote,
-            table: Table
+            table: Table,
+            image: {
+                class: ImageTool,
+                config: {
+                    endpoints: {
+                        byFile: '/upload/image/',  // если ты реализуешь загрузку
+                        byUrl: '/upload/by-url/'
+                    }
+                }
+            },
+            list: List,
+            embed: Embed
         },
-        placeholder: 'Начните писать...',
-        autofocus: true,
-        onReady: () => console.log('Editor.js готов'),
         onChange: async () => {
             const content = await editor.save();
             document.getElementById('content_html').value = JSON.stringify(content);

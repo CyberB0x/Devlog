@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from markdown2 import markdown
 from django.db.models.signals import post_save
+from .utils import render_editorjs_to_html
 
 
 class Category(models.Model):
@@ -13,22 +14,20 @@ class Category(models.Model):
 
 
 class Article(models.Model):
-    title = models.CharField(max_length=200)
-    content_md = models.TextField()
-    content_html = models.TextField(blank=True)
-    image = models.ImageField(upload_to='images/', blank=True, null=True)
-    code_snippet = models.TextField(blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='articles/', blank=True, null=True)
+    content_html = models.TextField(blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    views = models.PositiveIntegerField(default=0)
-
-    def save(self, *args, **kwargs):
-        self.content_html = markdown(self.content_md)
-        super().save(*args, **kwargs)
+    created_at = models.DateTimeField(auto_now_add=True)
+    views = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.content_html and self.content_html.strip().startswith('{'):
+            self.content_html = render_editorjs_to_html(self.content_html)
+        super().save(*args, **kwargs)
 
 
 class Favorite(models.Model):
