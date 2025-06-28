@@ -1,3 +1,6 @@
+import os.path
+
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -185,3 +188,24 @@ def toggle_like(request, pk):
             'liked': liked,
             'like_count': article.like_set.count()
         })
+
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image = request.FILES['image']
+        upload_path = os.path.join(settings.BASE_DIR, 'blog', 'static', 'postimg', image.name)
+
+        with open(upload_path, 'wb+') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+
+        url = f'/static/postimg/{image.name}'  # URL для доступа к файлу
+
+        return JsonResponse({
+            "success": 1,
+            "file": {
+                "url": url
+            }
+        })
+    return JsonResponse({"success": 0}, status=400)

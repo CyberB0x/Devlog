@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import toggle_like
+from .views import toggle_like, upload_image
 from . import views
 
 urlpatterns = [
@@ -13,5 +13,6 @@ urlpatterns = [
     path('api/views/<int:pk>/', views.stats_view, name='article_stats'),
     path('like/<int:pk>/', toggle_like, name='toggle_like'),
     path('stats/<int:pk>/', views.stats_view, name='stats_view'),
+    path('upload_images/', upload_image, name='upload_image'),
 
 ]
