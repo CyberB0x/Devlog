@@ -7,11 +7,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models.functions import TruncDate
 from .utils import render_editorjs_to_html
+
 import datetime
 import json
 
@@ -22,9 +23,6 @@ from .forms import ArticleForm, RegisterForm, CommentForm, EditProfileForm, Prof
 def home(request):
     articles = Article.objects.all().order_by('-created_at')
     return render(request, 'blog/home.html', {'articles': articles})
-
-
-from .models import Like  # убедись, что импортировал модель Like
 
 
 def article_detail(request, pk):
@@ -75,7 +73,7 @@ def add_article(request):
             article = form.save(commit=False)
             article.author = request.user
 
-            # 🔥 Преобразуем Editor.js JSON → HTML
+            # Преобразуем Editor.js JSON → HTML
             raw_content = request.POST.get("content_html", "")
             article.content_html = render_editorjs_to_html(raw_content)
 
@@ -94,22 +92,22 @@ def delete_article(request, pk):
 
 @login_required
 def profile_view(request):
-    profile = Profile.objects.get(user=request.user)
+    user = request.user
+    articles = Article.objects.filter(author=user)
+    total_views = articles.aggregate(Sum('views'))['views__sum'] or 0
 
-    articles = (
-        Article.objects
-        .filter(author=request.user)
-        .annotate(total_views=Count('articleview'))
-        .order_by('-created_at')
-    )
+    # данные для графика
+    chart_labels = [article.title for article in articles]
+    chart_data = [article.views for article in articles]
 
-    total_views_sum = sum(article.total_views for article in articles)
-
-    return render(request, 'blog/profile.html', {
-        'profile': profile,
+    context = {
         'articles': articles,
-        'total_views_sum': total_views_sum,
-    })
+        'profile': user.profile,
+        'total_views': total_views,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+    }
+    return render(request, 'blog/profile.html', context)
 
 
 @login_required
@@ -128,11 +126,11 @@ def edit_profile(request):
             avatar_form.save()
             login(request, user)  # Перелогиниваем, если пароль изменился
 
-            messages.add_message(
-                request, messages.INFO, "Обновление профиля успешно завершено!"
-            )
+            messages.success(request, "Обновление профиля успешно завершено!")
 
             return redirect('profile')
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
     else:
         user_form = EditProfileForm(instance=user)
         avatar_form = ProfileAvatarForm(instance=profile)
@@ -211,3 +209,4 @@ def upload_image(request):
         })
 
     return JsonResponse({"success": 0, "message": "Invalid request"}, status=400)
+

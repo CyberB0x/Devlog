@@ -2,37 +2,74 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .profile-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .article-list li {
+        border-left: 4px solid #007bff;
+        padding-left: 1rem;
+    }
+
+    .stats-header {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-top: 2rem;
+    }
+
+    canvas {
+        margin-top: 1rem;
+    }
+</style>
 
 {% if messages %}
-  <ul class="messages">
-      {% for message in messages %}
-      <li class="alert alert-primary">{{ message }}</li>
-      {% endfor %}
-  </ul>
+  <div class="mb-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}
+
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    {% if profile.avatar %}
-                        <img src="{{ profile.avatar.url }}" alt="Avatar" class="rounded-circle mb-3 shadow" width="120" height="120">
-                    {% else %}
-                        <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="rounded-circle mb-3 shadow" width="120" height="120">
-                    {% endif %}
+        <div class="col-lg-8">
+            <div class="profile-card text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="profile-avatar mb-3">
+                {% else %}
+                    <img src="{% static 'images/def-avatar.png' %}" alt="Avatar" class="profile-avatar mb-3">
+                {% endif %}
 
-                    <h4 class="fw-semibold">{{ user.username }}</h4>
-                    <p class="text-muted">{{ user.email }}</p>
+                <h4 class="fw-semibold mb-1">{{ user.username }}</h4>
+                <p class="text-muted mb-3">{{ user.email }}</p>
 
-                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary mt-2">Редактировать профиль</a>
-                </div>
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm me-2">Редактировать профиль</a>
+                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
+                </form>
             </div>
 
             <div class="mt-5">
                 <h5 class="fw-semibold mb-3">Ваши статьи</h5>
                 {% if articles %}
-                    <ul class="list-group">
+                    <ul class="list-group article-list">
                         {% for article in articles %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a>
@@ -45,37 +82,59 @@
                 {% endif %}
             </div>
 
-            <p>👁 Общие просмотры ваших статей: <strong>{{ total_views }}</strong></p>
+            <div class="stats-header">
+                <img src="{% static 'icons/post_views.png' %}" width="16" height="16" class="me-1">
+                Общие просмотры ваших статей: <strong>{{ total_views }}</strong>
+            </div>
             <canvas id="viewsChart" height="100"></canvas>
-
-
         </div>
     </div>
 </div>
 {% endblock %}
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-fetch("{% url 'stats_view' user.id %}")
-  .then(res => res.json())
-  .then(data => {
-    new Chart(document.getElementById('viewsChart'), {
-      type: 'line',
-      data: {
-        labels: data.dates,
-        datasets: [{
-          label: 'Просмотры',
-          data: data.views,
-          borderColor: 'rgba(75, 192, 192, 1)',
-          tension: 0.3,
-          fill: false
-        }]
-      },
-      options: {
-        scales: {
-          y: { beginAtZero: true }
+    const ctx = document.getElementById('viewsChart').getContext('2d');
+    const viewsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Количество просмотров',
+                data: {{ chart_data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
         }
-      }
     });
-  });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+          setTimeout(function () {
+            // Плавно скрыть
+            alert.classList.remove('show');
+            alert.classList.add('fade');
+            // Удалить из DOM после анимации
+            setTimeout(() => alert.remove(), 500);
+          }, 3000); // 3 секунды
+        });
+      });
 </script>

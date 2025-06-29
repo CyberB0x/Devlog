@@ -43,34 +43,53 @@
     <button type="submit" class="btn btn-primary">Сохранить</button>
 </form>
 
+
+
 <!-- Подключение EditorJS и плагинов -->
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@calumk/editorjs-codeflask@1.0.1/dist/bundle.js"></script>
-
-
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/table@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
 
 <script>
     const editor = new EditorJS({
     holder: 'editorjs',
     tools: {
-        header: Header,
-        code: CodeTool,
-        quote: Quote,
-        table: Table,
-        embed: Embed,
+        header: {
+           class: Header,
+           shortcut: 'CMD+SHIFT+H',
+        },
+
+        code: {
+           class: CodeTool,
+           shortcut: 'CMD+SHIFT+C',
+        },
+
+        quote: {
+           class: Quote,
+           shortcut: 'CMD+SHIFT+Q',
+        },
+
+        table: {
+           class: Table,
+           shortcut: 'CMD+SHIFT+T',
+        },
+
+        embed: {
+          class: Embed,
+          shortcut: 'CMD+SHIFT+E',
+        },
+
         image: {
             class: ImageTool,
+            shortcut: 'CMD+SHIFT+I',
             config: {
                 endpoints: {
-                    byFile: '/upload/image/',  // <--- теперь работает
-                    byUrl: '/upload/image/'    // можно также обрабатывать URL
+                    byFile: '/upload/image/',
+                    byUrl: '/upload/image/'
                 }
             }
         }

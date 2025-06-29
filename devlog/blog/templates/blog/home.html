@@ -2,28 +2,43 @@
 {% load static %}
 
 {% block content %}
-<h2 class="mb-4"><img src="{% static 'icons/books.png' %}" width="32" height="32"> Последние статьи</h2>
+<h2 class="mb-4 d-flex align-items-center gap-2">
+  <img src="{% static 'icons/all-post.png' %}" width="24" height="24"> Последние статьи
+</h2>
 
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<div class="container">
   {% for article in articles %}
-  <div class="col">
-    <div class="card h-100 shadow-sm">
-      {% if article.image %}
-      <img src="{{ article.image.url }}" class="rounded" alt="{{ article.title }}">
-      {% endif %}
-      <div class="card-body">
-        <h5 class="card-title">{{ article.title }}</h5>
-        <p class="card-text text-muted">
-          <img src="{% static 'icons/author.png' %}" width="24" height="24"> {{ article.author.username }}<br>
-          <img src="{% static 'icons/created_at.png' %}" width="24" height="24"> {{ article.created_at|date:"d M Y" }}<br>
-          <img src="{% static 'icons/views.png' %}" width="24" height="24"> {{ article.views }} просмотров
-        </p>
-        <a href="{% url 'article_detail' article.pk %}" class="btn btn-outline-primary btn-sm">Читать →</a>
+    <div class="p-4 mb-4 bg-white rounded shadow-sm border-start border-4 border-primary-subtle">
+      <div class="d-flex flex-column flex-md-row gap-3">
+        {% if article.image %}
+          <div class="flex-shrink-0" style="width: 180px;">
+            <a href="{% url 'article_detail' article.pk %}">
+              <img src="{{ article.image.url }}" class="img-fluid rounded" alt="{{ article.title }}">
+            </a>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <h4 class="mb-1">
+            <a href="{% url 'article_detail' article.pk %}" class="text-decoration-none text-dark">{{ article.title }}</a>
+          </h4>
+          <p class="text-muted small mb-2">
+            <img src="{% static 'icons/author_post.png' %}" width="16" height="16"> {{ article.author.username }} &nbsp;|&nbsp;
+            <img src="{% static 'icons/post_created_at.png' %}" width="16" height="16"> {{ article.created_at|date:"d M Y H:i" }} &nbsp;|&nbsp;
+            <img src="{% static 'icons/post_views.png' %}" width="16" height="16"> {{ article.views }} просмотров
+          </p>
+          {% if article.content_html %}
+          <div class="text-muted small" style="max-height: 80px; overflow: hidden;">
+            {{ article.content_html|striptags|truncatechars:250 }}
+          </div>
+          {% endif %}
+          <div class="mt-2">
+            <a href="{% url 'article_detail' article.pk %}" class="btn btn-sm btn-outline-primary">Читать далее →</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
   {% empty %}
-  <p>Нет опубликованных статей.</p>
+    <p class="text-muted">Пока нет опубликованных статей.</p>
   {% endfor %}
 </div>
 {% endblock %}
