@@ -16,7 +16,7 @@
 
     {% if article.content_html %}
         <div class="p-3 bg-light border rounded shadow-sm">
-            <h5>📄 Содержание статьи:</h5>
+            <h5>Содержание статьи:</h5>
             <div>{{ article.content_html|safe }}</div>
         </div>
     {% endif %}
@@ -41,7 +41,7 @@
 
 <!-- 💬 Комментарии -->
 <div class="mt-5">
-    <h5>💬 Комментарии ({{ comments.count }})</h5>
+    <h5><img src="{% static 'icons/comments.png'}" width="24" height="24"> Комментарии ({{ comments.count }})</h5>
 
     {% if comments %}
         <ul class="list-group mb-4">

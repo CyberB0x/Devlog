@@ -36,8 +36,8 @@
         <div class="collapse navbar-collapse justify-content-between" id="navbarMenu">
             <ul class="navbar-nav">
                 {% if not user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">🔐 Войти</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">📝 Регистрация</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Войти</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
                 {% endif %}
             </ul>
 

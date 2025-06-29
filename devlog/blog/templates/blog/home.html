@@ -14,9 +14,9 @@
       <div class="card-body">
         <h5 class="card-title">{{ article.title }}</h5>
         <p class="card-text text-muted">
-          <img src="{% static 'icons/author.png' %}" width="16" height="16"> {{ article.author.username }}<br>
-          <img src="{% static 'icons/created_at.png' %}" width="16" height="16"> {{ article.created_at|date:"d M Y" }}<br>
-          <img src="{% static 'icons/views.png' %}" width="16" height="16"> {{ article.views }} просмотров
+          <img src="{% static 'icons/author.png' %}" width="24" height="24"> {{ article.author.username }}<br>
+          <img src="{% static 'icons/created_at.png' %}" width="24" height="24"> {{ article.created_at|date:"d M Y" }}<br>
+          <img src="{% static 'icons/views.png' %}" width="24" height="24"> {{ article.views }} просмотров
         </p>
         <a href="{% url 'article_detail' article.pk %}" class="btn btn-outline-primary btn-sm">Читать →</a>
       </div>
