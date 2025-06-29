@@ -13,6 +13,6 @@ urlpatterns = [
     path('api/views/<int:pk>/', views.stats_view, name='article_stats'),
     path('like/<int:pk>/', toggle_like, name='toggle_like'),
     path('stats/<int:pk>/', views.stats_view, name='stats_view'),
-    path('upload_images/', upload_image, name='upload_image'),
+    path('upload/image/', upload_image, name='upload_image'),
 
 ]

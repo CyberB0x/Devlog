@@ -55,32 +55,30 @@
 
 <script>
     const editor = new EditorJS({
-        holder: 'editorjs',
-        tools: {
-            header: Header,
-            code: CodeTool,
-            quote: Quote,
-            table: Table,
-            embed: Embed,
-
-            image: {
-              class: ImageTool,
-              config: {
-                 endpoints: {
-                   byFile: 'static/postimg',
-                   byUrl: 'static/postimg',
-                 }
-              }
-            },
-
-
-        },
-        placeholder: 'Начните писать...',
-        onReady: () => console.log('Editor.js готов'),
-        onChange: async () => {
-            const content = await editor.save();
-            document.getElementById('content_html').value = JSON.stringify(content);
+    holder: 'editorjs',
+    tools: {
+        header: Header,
+        code: CodeTool,
+        quote: Quote,
+        table: Table,
+        embed: Embed,
+        image: {
+            class: ImageTool,
+            config: {
+                endpoints: {
+                    byFile: '/upload/image/',  // <--- теперь работает
+                    byUrl: '/upload/image/'    // можно также обрабатывать URL
+                }
+            }
         }
-    });
+    },
+    placeholder: 'Начните писать...',
+    onReady: () => console.log('Editor.js готов'),
+    onChange: async () => {
+        const content = await editor.save();
+        document.getElementById('content_html').value = JSON.stringify(content);
+    }
+});
+
 </script>
 {% endblock %}
