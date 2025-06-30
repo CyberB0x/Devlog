@@ -1,0 +1,29 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<h3 class="mb-4">🔍 Результаты поиска по запросу: <em>{{ query }}</em></h3>
+
+{% if results %}
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for article in results %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          {% if article.image %}
+            <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ article.title }}</h5>
+            <p class="card-text text-muted">
+              👤 {{ article.author.username }}<br>
+              🕒 {{ article.created_at|date:"d M Y" }}<br>
+              👁 {{ article.views }} просмотров
+            </p>
+            <a href="{% url 'article_detail' article.pk %}" class="btn btn-outline-primary btn-sm">Читать →</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-muted">Ничего не найдено.</p>
+{% endif %}
+{% endblock %}

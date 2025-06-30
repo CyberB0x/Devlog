@@ -14,5 +14,6 @@ urlpatterns = [
     path('like/<int:pk>/', toggle_like, name='toggle_like'),
     path('stats/<int:pk>/', views.stats_view, name='stats_view'),
     path('upload/image/', upload_image, name='upload_image'),
+    path('search/', views.search_articles, name='search_articles'),
 
 ]

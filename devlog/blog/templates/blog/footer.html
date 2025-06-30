@@ -1,0 +1,33 @@
+<footer class="bg-light text-center text-lg-start mt-5 border-top shadow-sm">
+  <div class="container p-4">
+
+    <div class="row">
+
+      <div class="col-lg-6 col-md-12 mb-4 mb-md-0 text-start">
+        <h5 class="text-uppercase fw-bold">🧠 DevLog</h5>
+        <p class="text-muted">
+          Платформа для публикации статей, сниппетов и обмена знаниями между разработчиками.
+        </p>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+        <h5 class="text-uppercase fw-bold">Навигация</h5>
+        <ul class="list-unstyled mb-0">
+          <li><a href="{% url 'home' %}" class="text-decoration-none text-muted">🏠 Главная</a></li>
+          <li><a href="{% url 'add_article' %}" class="text-decoration-none text-muted">✍ Добавить статью</a></li>
+          <li><a href="{% url 'profile' %}" class="text-decoration-none text-muted">👤 Профиль</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+        <h5 class="text-uppercase fw-bold">Контакты</h5>
+        <ul class="list-unstyled">
+          <li><a href="mailto:admin@devlog.com" class="text-decoration-none text-muted">📧 admin@devlog.com</a></li>
+          <li><span class="text-muted">© {{ year|default:"2025" }} DevLog</span></li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+</footer>

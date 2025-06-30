@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models.functions import TruncDate
 from .utils import render_editorjs_to_html
+from django.db.models import Q
 
 import datetime
 import json
@@ -210,3 +211,15 @@ def upload_image(request):
 
     return JsonResponse({"success": 0, "message": "Invalid request"}, status=400)
 
+
+def search_articles(request):
+    query = request.GET.get('q', '')
+    results = Article.objects.filter(
+        Q(title__icontains=query) |
+        Q(content_html__icontains=query)
+    ).order_by('-created_at') if query else []
+
+    return render(request, 'blog/search_results.html', {
+        'query': query,
+        'results': results,
+    })

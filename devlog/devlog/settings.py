@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+    'accounts',
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -130,3 +131,11 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'blog/static']
 LOGOUT_REDIRECT_URL = 'login'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_mail@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_app_code'
+DEFAULT_FROM_EMAIL = 'DevLog <youremail@gmail.com>'
