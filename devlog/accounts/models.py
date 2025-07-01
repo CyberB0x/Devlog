@@ -8,4 +8,6 @@ class PasswordResetCode(models.Model):
     is_used = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Reset code for {self.user.username}"
+        return f'{self.user.username} - {self.code}'
+
+

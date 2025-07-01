@@ -3,6 +3,10 @@ from django import forms
 class EmailForm(forms.Form):
     email = forms.EmailField(label="Email", max_length=254)
 
+class EmailLoginForm(forms.Form):
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
 class CodeVerificationForm(forms.Form):
     code = forms.CharField(label="Код", max_length=6)
 

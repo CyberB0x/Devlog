@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 30px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .code {
+            font-size: 26px;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Сброс пароля</h2>
+        <p>Вы запросили сброс пароля на DevLog. Ваш код:</p>
+        <div class="code">{{ code }}</div>
+        <p>Введите этот код на сайте для продолжения.</p>
+        <p>Если вы не запрашивали сброс пароля, проигнорируйте это сообщение.</p>
+        <div class="footer">
+            &copy; 2025 DevLog
+        </div>
+    </div>
+</body>
+</html>
