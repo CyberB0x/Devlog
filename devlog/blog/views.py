@@ -17,8 +17,8 @@ from django.db.models import Q
 import datetime
 import json
 
-from .models import Article, Category, Favorite, Tip, ArticleView, Profile, Like
-from .forms import ArticleForm, RegisterForm, CommentForm, EditProfileForm, ProfileAvatarForm
+from .models import Article, Category, Favorite, Tip, ArticleView, Like
+from .forms import ArticleForm, CommentForm
 
 
 def home(request):
@@ -91,68 +91,6 @@ def delete_article(request, pk):
     return redirect('home')
 
 
-@login_required
-def profile_view(request):
-    user = request.user
-    articles = Article.objects.filter(author=user)
-    total_views = articles.aggregate(Sum('views'))['views__sum'] or 0
-
-    # данные для графика
-    chart_labels = [article.title for article in articles]
-    chart_data = [article.views for article in articles]
-
-    context = {
-        'articles': articles,
-        'profile': user.profile,
-        'total_views': total_views,
-        'chart_labels': chart_labels,
-        'chart_data': chart_data,
-    }
-    return render(request, 'blog/profile.html', context)
-
-
-@login_required
-def edit_profile(request):
-    user = request.user
-    profile = user.profile
-
-    if request.method == 'POST':
-        user_form = EditProfileForm(request.POST, instance=user)
-        avatar_form = ProfileAvatarForm(request.POST, request.FILES, instance=profile)
-        if user_form.is_valid() and avatar_form.is_valid():
-            user = user_form.save()
-            if user_form.cleaned_data['password']:
-                user.set_password(user_form.cleaned_data['password'])
-                user.save()
-            avatar_form.save()
-            login(request, user)  # Перелогиниваем, если пароль изменился
-
-            messages.success(request, "Обновление профиля успешно завершено!")
-
-            return redirect('profile')
-        else:
-            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
-    else:
-        user_form = EditProfileForm(instance=user)
-        avatar_form = ProfileAvatarForm(instance=profile)
-
-    return render(request, 'blog/edit_profile.html', {
-        'user_form': user_form,
-        'avatar_form': avatar_form
-    })
-
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/register.html', {'form': form})
-
 
 # 📊 Данные для графика просмотров (json)
 def stats_view(request, pk):
@@ -210,6 +148,9 @@ def upload_image(request):
         })
 
     return JsonResponse({"success": 0, "message": "Invalid request"}, status=400)
+
+
+
 
 
 def search_articles(request):

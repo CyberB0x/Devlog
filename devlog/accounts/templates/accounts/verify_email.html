@@ -1,0 +1,12 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<div class="container py-5">
+  <h3>Подтверждение Email</h3>
+  <form method="post">
+    {% csrf_token %}
+    <label>Введите код, отправленный на ваш email</label>
+    <input type="text" name="code" class="form-control mb-3" required>
+    <button type="submit" class="btn btn-primary">Подтвердить</button>
+  </form>
+</div>
+{% endblock %}

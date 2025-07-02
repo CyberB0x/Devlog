@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -137,5 +137,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your_email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_app_code'
+EMAIL_HOST_PASSWORD = 'your_code'
 DEFAULT_FROM_EMAIL = 'DevLog <youremail@gmail.com>'
