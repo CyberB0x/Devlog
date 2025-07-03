@@ -66,12 +66,16 @@
                 </form>
             </div>
 
-            {% if not user.profile.email_verified %}
+            {% if not profile.email_verified %}
               <div class="alert alert-warning d-flex justify-content-between align-items-center">
-                <div>📧 Ваш email не подтверждён</div>
-                <a href="{% url 'send_email_code' %}" class="btn btn-sm btn-outline-primary">Подтвердить</a>
+                <span>📧 Ваш email не подтверждён</span>
+                <form method="post" action="{% url 'send_verification_email' %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-primary btn-sm">Подтвердить</button>
+                </form>
               </div>
             {% endif %}
+
 
             <div class="mt-5">
                 <h5 class="fw-semibold mb-3">Ваши статьи</h5>

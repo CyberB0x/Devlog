@@ -32,7 +32,7 @@ def login_view(request):
         except User.DoesNotExist:
             messages.error(request, 'Пользователь с таким email не найден.')
 
-    return render(request, 'auth/login.html')
+    return render(request, 'registration/login.html')
 
 
 def forgot_password(request):

@@ -13,16 +13,12 @@ class PasswordResetCode(models.Model):
         return f'{self.user.username} - {self.code}'
 
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(blank=True)
+    email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
