@@ -21,16 +21,18 @@ def login_view(request):
 
         try:
             user = User.objects.get(email=email)
-            user = authenticate(request, username=user.username, password=password)
-
-            if user is not None:
-                login(request, user)
-                return redirect('home')
-            else:
-                messages.error(request, 'Неверный email или пароль.')
-
         except User.DoesNotExist:
             messages.error(request, 'Пользователь с таким email не найден.')
+            return render(request, 'registration/login.html')
+
+
+        user_auth = authenticate(request, username=user.username, password=password)
+
+        if user_auth is not None:
+            login(request, user_auth)
+            return redirect('home')
+        else:
+            messages.error(request, 'Неверный email или пароль.')
 
     return render(request, 'registration/login.html')
 
@@ -105,11 +107,11 @@ def reset_password(request):
             request.session.pop('reset_user_id')
             request.session.pop('verified_for_reset')
 
-            # ✅ Автоматически авторизовать пользователя
+            # Автоматически авторизовать пользователя
             login(request, user)
 
             messages.success(request, 'Пароль успешно сброшен.')
-            return redirect('profile')  # 🔁 Редирект в профиль (или на главную)
+            return redirect('profile')  # Редирект в профиль (или на главную)
 
     return render(request, 'auth/reset_password.html')
 
@@ -156,14 +158,15 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            Profile.objects.get_or_create(user=user)  # <-- безопасно, не создаст дубликат
+            user = form.save(commit=False)
+            user.username = form.cleaned_data['email']
+            user.save()
+            Profile.objects.get_or_create(user=user)
             login(request, user)
             return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
-
 
 @login_required
 def edit_profile(request):
