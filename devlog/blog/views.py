@@ -4,20 +4,14 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Count, Sum
+from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
 from django.db.models.functions import TruncDate
 from .utils import render_editorjs_to_html
 from django.db.models import Q
-
-import datetime
-import json
-
-from .models import Article, Category, Favorite, Tip, ArticleView, Like
+from .models import Article, ArticleView, Like
 from .forms import ArticleForm, CommentForm
 
 
@@ -30,7 +24,6 @@ def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
     comments = article.comments.all().order_by('-created_at')
 
-    # Просмотр: по session_key
     session_key = request.session.session_key
     if not session_key:
         request.session.create()
@@ -74,7 +67,6 @@ def add_article(request):
             article = form.save(commit=False)
             article.author = request.user
 
-            # Преобразуем Editor.js JSON → HTML
             raw_content = request.POST.get("content_html", "")
             article.content_html = render_editorjs_to_html(raw_content)
 
@@ -84,12 +76,12 @@ def add_article(request):
         form = ArticleForm()
     return render(request, 'blog/article_form.html', {'form': form})
 
+
 @login_required
 def delete_article(request, pk):
     article = get_object_or_404(Article, pk=pk, author=request.user)
     article.delete()
     return redirect('home')
-
 
 
 # 📊 Данные для графика просмотров (json)
@@ -148,9 +140,6 @@ def upload_image(request):
         })
 
     return JsonResponse({"success": 0, "message": "Invalid request"}, status=400)
-
-
-
 
 
 def search_articles(request):

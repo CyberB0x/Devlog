@@ -3,15 +3,19 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Profile
 
+
 class EmailForm(forms.Form):
     email = forms.EmailField(label="Email", max_length=254)
+
 
 class EmailLoginForm(forms.Form):
     email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
+
 class CodeVerificationForm(forms.Form):
     code = forms.CharField(label="Код", max_length=6)
+
 
 class PasswordResetForm(forms.Form):
     new_password = forms.CharField(label="Новый пароль", widget=forms.PasswordInput)
@@ -37,7 +41,6 @@ class RegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
-
 
 
 class EditProfileForm(forms.ModelForm):

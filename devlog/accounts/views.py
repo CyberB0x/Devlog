@@ -5,13 +5,11 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from .models import PasswordResetCode, EmailVerificationCode, Profile
 import random
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, get_backends
 from .forms import EmailLoginForm, RegisterForm, EditProfileForm, ProfileAvatarForm
 from django.template.loader import render_to_string
 from django.db.models import Sum
 from blog.models import Article
-
-
 
 
 def login_view(request):
@@ -19,16 +17,15 @@ def login_view(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        user = User.objects.filter(email=email).first()
+
+        if not user:
             messages.error(request, 'Пользователь с таким email не найден.')
             return render(request, 'registration/login.html')
 
-
         user_auth = authenticate(request, username=user.username, password=password)
 
-        if user_auth is not None:
+        if user_auth:
             login(request, user_auth)
             return redirect('home')
         else:
@@ -103,33 +100,41 @@ def reset_password(request):
             user.set_password(password1)
             user.save()
 
-            # Очистить сессию
             request.session.pop('reset_user_id')
             request.session.pop('verified_for_reset')
 
-            # Автоматически авторизовать пользователя
+            backend = get_backends()[0]
+            user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
             login(request, user)
 
             messages.success(request, 'Пароль успешно сброшен.')
-            return redirect('profile')  # Редирект в профиль (или на главную)
+            return redirect('profile')
 
     return render(request, 'auth/reset_password.html')
 
 
 @login_required
 def send_verification_email(request):
+    user = request.user
+
+    # Удаляем старые неиспользованные коды (опционально)
+    EmailVerificationCode.objects.filter(user=user, is_used=False).delete()
+
     code = str(random.randint(100000, 999999))
-    EmailVerificationCode.objects.create(user=request.user, code=code)
+    EmailVerificationCode.objects.create(user=user, code=code)
 
-    send_mail(
-        'Подтверждение email',
-        f'Ваш код подтверждения: {code}',
-        'noreply@devlog.com',
-        [request.user.email],
-        fail_silently=False
-    )
+    try:
+        send_mail(
+            subject='Подтверждение email',
+            message=f'Ваш код подтверждения: {code}',
+            from_email='noreply@devlog.com',
+            recipient_list=[user.email],
+            fail_silently=False
+        )
+        messages.success(request, 'Код подтверждения отправлен на ваш email.')
+    except Exception as e:
+        messages.error(request, f'Ошибка при отправке письма: {str(e)}')
 
-    messages.success(request, 'Код отправлен на email.')
     return redirect('verify_email')
 
 
@@ -168,6 +173,7 @@ def register(request):
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
 
+
 @login_required
 def edit_profile(request):
     user = request.user
@@ -176,17 +182,25 @@ def edit_profile(request):
     if request.method == 'POST':
         user_form = EditProfileForm(request.POST, instance=user)
         avatar_form = ProfileAvatarForm(request.POST, request.FILES, instance=profile)
+
         if user_form.is_valid() and avatar_form.is_valid():
             user = user_form.save()
-            if user_form.cleaned_data['password']:
-                user.set_password(user_form.cleaned_data['password'])
+
+            # Если пароль был изменён — установить
+            password = user_form.cleaned_data.get('password')
+            if password:
+                user.set_password(password)
                 user.save()
+
             avatar_form.save()
-            login(request, user)  # Перелогиниваем, если пароль изменился
+
+            backend = get_backends()[0]
+            user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
+            login(request, user)
 
             messages.success(request, "Обновление профиля успешно завершено!")
-
             return redirect('profile')
+
         else:
             messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
     else:
@@ -202,16 +216,19 @@ def edit_profile(request):
 @login_required
 def profile_view(request):
     user = request.user
+
+    # Защита: создать профиль, если он не существует
+    profile, created = Profile.objects.get_or_create(user=user)
+
     articles = Article.objects.filter(author=user)
     total_views = articles.aggregate(Sum('views'))['views__sum'] or 0
 
-    # данные для графика
     chart_labels = [article.title for article in articles]
     chart_data = [article.views for article in articles]
 
     context = {
         'articles': articles,
-        'profile': user.profile,
+        'profile': profile,
         'total_views': total_views,
         'chart_labels': chart_labels,
         'chart_data': chart_data,

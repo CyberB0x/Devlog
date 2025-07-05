@@ -1,9 +1,8 @@
 from django import forms
 from .models import Article
-from django.contrib.auth.models import User
-from django.forms import widgets
 from django.contrib.auth.forms import AuthenticationForm
 from .models import Comment
+
 
 class BootstrapLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
@@ -33,5 +32,3 @@ class CommentForm(forms.ModelForm):
                 'placeholder': 'Напишите комментарий...'
             }),
         }
-
-
