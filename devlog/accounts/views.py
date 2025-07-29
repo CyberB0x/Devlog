@@ -14,20 +14,29 @@ from blog.models import Article
 
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get('email').strip()
+        password = request.POST.get('password').strip()
 
-        user = User.objects.filter(email=email).first()
-
-        if not user:
+        # Проверяем, сколько пользователей с этим email
+        users = User.objects.filter(email=email)
+        if not users.exists():
             messages.error(request, 'Пользователь с таким email не найден.')
             return render(request, 'registration/login.html')
 
+        if users.count() > 1:
+            messages.error(request, 'Обнаружено несколько аккаунтов с этим email. Обратитесь в поддержку.')
+            return render(request, 'registration/login.html')
+
+        user = users.first()
+
+        # Аутентификация по username (Django требует username)
         user_auth = authenticate(request, username=user.username, password=password)
 
-        if user_auth:
+        if user_auth is not None:
             login(request, user_auth)
-            return redirect('home')
+            # Поддержка параметра next
+            next_url = request.GET.get('next') or 'home'
+            return redirect(next_url)
         else:
             messages.error(request, 'Неверный email или пароль.')
 
@@ -163,16 +172,23 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
+            # Создаем пользователя
             user = form.save(commit=False)
-            user.username = form.cleaned_data['email']
+            user.username = form.cleaned_data['email']  # username = email
             user.save()
+
+            # Создаем профиль
             Profile.objects.get_or_create(user=user)
+
+            # Указываем backend вручную
+            backend = get_backends()[0]
+            user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
             login(request, user)
+
             return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
-
 
 @login_required
 def edit_profile(request):
